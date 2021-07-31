@@ -1,0 +1,52 @@
+        .pos 0
+	irmovq stack, %rsp      
+	call main
+	halt
+        
+        .align  8
+switch_table:
+        .quad   case_0
+        .quad   default
+        .quad   case_25
+        .quad   case_3
+        .quad   default
+        .quad   case_25
+
+main:
+        irmovq  $6, %rdi
+	call    switchv
+	ret   
+
+switchv:
+        # idx in %rdi
+        irmovq  $0xddd, %rax    # result = 0xddd
+        xorq    %r8, %r8        # set %r8 = 0
+        addq    %r8, %rdi        # set CC for %rdi
+        jl      default         # return if idx < 0
+        irmovq  switch_table, %rdx    # set %rdx to switchtable
+        rrmovq  %rdi, %r10      # copy idx
+        irmovq  $5, %r9         # copy 5 to test
+        subq    %r9, %r10       # idx - 5
+        jg      default         # go to default if idx > 5
+        addq    %rdi, %rdi      # 2idx
+        addq    %rdi, %rdi      # 4idx
+        addq    %rdi, %rdi      # 8idx
+        addq    %rdi, %rdx      # %rdx= switch_table + 8*idx
+        mrmovq  (%rdx), %rdx    # %rdx = swicth_table address
+        pushq   %rdx
+        ret
+default:
+        ret
+case_0:
+        irmovq  $0xaaa, %rax
+        ret
+case_25:
+        irmovq  $0xbbb, %rax
+        ret
+case_3:
+        irmovq  $0xccc, %rax
+        ret
+        
+
+        .pos 0x300
+stack:
