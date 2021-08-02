@@ -63,8 +63,11 @@ void eval(char *cmdline)
 		unix_error("waitfg: waitpid error");
             release_job(pid);
 	}
-	else 
+	else {
+          save_job_cmd(pid, argv);
           printf("[%d] %d %s", get_jid(pid), pid, cmdline);
+        } 
+          
         
 	    
     }
