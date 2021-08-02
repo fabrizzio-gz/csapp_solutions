@@ -43,7 +43,6 @@ int get_jid(pid_t pid) {
 
 void release_job(pid_t pid) {
   jobs[get_jid(pid) - 1] = 0;
-  return;
 }
 
 void print_jobs() {
@@ -70,4 +69,20 @@ void save_job_cmd(pid_t pid, char *argv[]) {
 void print_finished_job(pid_t pid) {
   int job_i = get_jid(pid) - 1;
   printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
+}
+
+extern pid_t fg_job;
+
+void terminate_fg() {
+  pid_t pgid = -fg_job;
+  /* kill process group, if not set, kill job 
+   * (due to race conditions) */
+  if (kill(pgid, 2) < 0) {
+    Kill(fg_job, 2);
+  }
+  
+  Waitpid(fg_job, NULL, 0);
+  Sio_puts("fg job finished\n");
+  release_job(fg_job);
+  fg_job = 0;
 }

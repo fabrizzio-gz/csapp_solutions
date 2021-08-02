@@ -1,6 +1,7 @@
 /* $begin shellmain */
 #include "csapp.h"
 #include "jobs.h"
+#include "sig_handlers.h"
 #define MAXARGS   128
 #ifndef MAXJOBS
 #define MAXJOBS   16
@@ -13,12 +14,18 @@ int builtin_command(char **argv);
 void reap_finished_children();
 
 /* globals */
-pid_t jobs[MAXJOBS] = {0}; 
+pid_t jobs[MAXJOBS] = {0};
+pid_t fg_job = 0;
+sigjmp_buf buf;
 
 int main() 
 {
     char cmdline[MAXLINE]; /* Command line */
-
+    
+    Signal(2, sigint_handler);
+    if (sigsetjmp(buf, 1) > 0 )
+      terminate_fg();
+    
     while (1) {
 	/* Read */
 	printf("> ");                   
@@ -49,29 +56,30 @@ void eval(char *cmdline)
 
     if (!builtin_command(argv)) { 
         if ((pid = Fork()) == 0) {   /* Child runs user job */
-            if (execve(argv[0], argv, environ) < 0) {
-                printf("%s: Command not found.\n", argv[0]);
-                exit(0);
-            }
-        } else 
-          /* Parent stores child PID */
-          save_job(pid);
+          /* Set pgid to children pid */
+          Setpgid(0, 0);
+          if (execve(argv[0], argv, environ) < 0) {
+            printf("%s: Command not found.\n", argv[0]);
+            exit(0);
+          }
+        }
         
-
+        /* Parent stores child PID */
+        save_job(pid);
+        
 	/* Parent waits for foreground job to terminate */
 	if (!bg) {
 	    int status;
+            fg_job = pid;
 	    if (waitpid(pid, &status, 0) < 0)
 		unix_error("waitfg: waitpid error");
             release_job(pid);
+            fg_job = 0;
 	}
 	else {
           save_job_cmd(pid, argv);
           printf("[%d] %d %s", get_jid(pid), pid, cmdline);
         } 
-          
-       
-          
 	    
     }
     return;
