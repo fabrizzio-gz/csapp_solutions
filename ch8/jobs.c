@@ -13,18 +13,19 @@ static char *status[2] = {"Running", "Stopped"};
 /* Save only MAXCMD chars of job command */
 static char job_cmd[MAXJOBS][MAXCMD];
 
-void save_job(pid_t pid, int n) {
+void save_job(pid_t pid) {
   for (int i=0; i < MAXJOBS; i++)
     if (jobs[i] == 0) {
       jobs[i] = pid;
       return;
     }
 
-  fprintf(stderr, "Reached job limit: %d. Can't save job", n);
+  fprintf(stderr, "Reached job limit: %d. Can't save job", MAXJOBS);
   // reap children and quit
   // reap_children();
   // exit(0);
   return;
+
 }
 
 int get_jid(pid_t pid) {
@@ -40,16 +41,8 @@ int get_jid(pid_t pid) {
 }
 
 void release_job(pid_t pid) {
-  for (int i=0; i < MAXJOBS; i++)
-    if (jobs[i] == pid) {
-      jobs[i] = 0;
-      return;
-    }
-
-  // reap_children();
-  char s[64];
-  sprintf(s, "release_job: Unkown PID %d", pid);
-  unix_error(s);
+  jobs[get_jid(pid) - 1] = 0;
+  return;
 }
 
 void print_jobs() {
