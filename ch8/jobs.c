@@ -40,3 +40,9 @@ void release_job(pid_t pid, int n) {
   sprintf(s, "release_job: Unkown PID %d", pid);
   unix_error(s);
 }
+
+void print_jobs(int n) {
+  for (int i=0; i < n; i++)
+    if (jobs[i] != 0)
+      printf("[%d] %d\tTODO:STATUS\tTODO:args\n", i+1, jobs[i]);
+}
