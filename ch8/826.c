@@ -2,7 +2,9 @@
 #include "csapp.h"
 #include "jobs.h"
 #define MAXARGS   128
+#ifndef MAXJOBS
 #define MAXJOBS   16
+#endif
 
 /* Function prototypes */
 void eval(char *cmdline);
@@ -51,7 +53,7 @@ void eval(char *cmdline)
             }
         } else 
           /* Parent stores child PID */
-          save_job(pid, MAXJOBS);
+          save_job(pid);
         
 
 	/* Parent waits for foreground job to terminate */
@@ -59,10 +61,10 @@ void eval(char *cmdline)
 	    int status;
 	    if (waitpid(pid, &status, 0) < 0)
 		unix_error("waitfg: waitpid error");
-            release_job(pid, MAXJOBS);
+            release_job(pid);
 	}
 	else 
-          printf("[%d] %d %s", get_jid(pid, MAXJOBS), pid, cmdline);
+          printf("[%d] %d %s", get_jid(pid), pid, cmdline);
         
 	    
     }
@@ -75,7 +77,7 @@ int builtin_command(char **argv)
     if (!strcmp(argv[0], "quit")) /* quit command */
 	exit(0);
     if(!strcmp(argv[0], "jobs")) {
-      print_jobs(MAXJOBS);
+      print_jobs();
       return 1;
     }
     if (!strcmp(argv[0], "&"))    /* Ignore singleton & */
