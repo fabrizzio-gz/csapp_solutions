@@ -5,6 +5,8 @@
 #endif
 
 extern pid_t jobs[];
+static char job_status[MAXJOBS] = {0}; /* 0: Running, 1: Stopped */
+static char *status[2] = {"Running", "Stopped"};
 
 void save_job(pid_t pid, int n) {
   for (int i=0; i < MAXJOBS; i++)
@@ -48,5 +50,5 @@ void release_job(pid_t pid) {
 void print_jobs() {
   for (int i=0; i < MAXJOBS; i++)
     if (jobs[i] != 0)
-      printf("[%d] %d\tTODO:STATUS\tTODO:args\n", i+1, jobs[i]);
+      printf("[%d] %d %s\tTODO:args\n", i+1, jobs[i], status[job_status[i]]);
 }
