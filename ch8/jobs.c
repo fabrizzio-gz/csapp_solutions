@@ -80,9 +80,15 @@ void terminate_fg() {
   if (kill(pgid, 2) < 0) {
     Kill(fg_job, 2);
   }
-  
-  Waitpid(fg_job, NULL, 0);
-  Sio_puts("fg job finished\n");
+
+  int status;
+  Waitpid(fg_job, &status, 0);
+  if (WIFSIGNALED(status)) {
+    char s[50];
+    sprintf(s, "Job %d terminated by signal", fg_job);
+    psignal(WTERMSIG(status), s);
+  }
+    
   release_job(fg_job);
   fg_job = 0;
 }
