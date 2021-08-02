@@ -10,6 +10,7 @@
 void eval(char *cmdline);
 int parseline(char *buf, char **argv);
 int builtin_command(char **argv);
+void reap_finished_children();
 
 /* globals */
 pid_t jobs[MAXJOBS] = {0}; 
@@ -27,6 +28,7 @@ int main()
 
 	/* Evaluate */
 	eval(cmdline);
+        reap_finished_children();
     } 
 }
 /* $end shellmain */
@@ -68,7 +70,8 @@ void eval(char *cmdline)
           printf("[%d] %d %s", get_jid(pid), pid, cmdline);
         } 
           
-        
+       
+          
 	    
     }
     return;
@@ -123,4 +126,10 @@ int parseline(char *buf, char **argv)
 }
 /* $end parseline */
 
-
+void reap_finished_children() {
+  pid_t finished_pid;
+  while ((finished_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+    print_finished_job(finished_pid);
+    release_job(finished_pid);
+  }
+}

@@ -65,3 +65,8 @@ void save_job_cmd(pid_t pid, char *argv[]) {
     }
   }
 }
+
+void print_finished_job(pid_t pid) {
+  int job_i = get_jid(pid) - 1;
+  printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
+}
