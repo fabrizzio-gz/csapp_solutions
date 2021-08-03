@@ -18,19 +18,24 @@ pid_t jobs[MAXJOBS] = {0};
 pid_t fg_job = 0;
 sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
+volatile sig_atomic_t stop = 0;
 
 int main() 
 {
     char cmdline[MAXLINE]; /* Command line */
-    
-    Signal(2, sigint_handler);
-    if (sigsetjmp(buf, 1) > 0 )
+
+    Signal(2, sigint_handler);   /* SIGINT */
+    Signal(20, sigint_handler);  /* SIGTSTP */
+    if (sigsetjmp(buf, 1) > 0 ) {
       if (terminate == 1) {
         terminate = 0;
         terminate_fg();
+      } else if (stop == 1) {
+        stop = 0;
+        stop_fg();
       }
-       
-    
+    }
+        
     while (1) {
 	/* Read */
 	printf("> ");                   

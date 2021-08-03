@@ -92,3 +92,7 @@ void terminate_fg() {
   release_job(fg_job);
   fg_job = 0;
 }
+
+void stop_fg() {
+  printf("Pressed ctrl+z!\n");
+}
