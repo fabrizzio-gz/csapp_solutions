@@ -39,9 +39,11 @@ int main()
 	/* Read */
 	printf("> ");                   
 	Fgets(cmdline, MAXLINE, stdin); 
-	if (feof(stdin))
-	    exit(0);
-
+	if (feof(stdin)) {
+          reap_all_children();
+          exit(0);
+        }
+	    
 	/* Evaluate */
 	eval(cmdline);
         reap_terminated_children();
