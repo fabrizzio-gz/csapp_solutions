@@ -3,7 +3,10 @@
 #ifndef MAXJOBS
 #define MAXJOBS  16
 #endif
-#define MAXCMD   16  
+#define MAXCMD   16
+
+static void send_sig(pid_t pid, int sig);
+static pid_t parse_pid(char *arg);
 
 extern pid_t jobs[];
 
@@ -66,12 +69,24 @@ void save_job_cmd(pid_t pid, char *argv[]) {
   }
 }
 
+void resume_bg_job(char **argv) {
+  pid_t pid;
+  if ((pid = parse_pid(argv[1])) > 0) {
+    send_sig(pid, 18);
+    int jid = get_jid(pid);
+    job_status[jid-1] = 0; /* running */
+    printf("[%d] %d\t%s\n", jid, pid, job_cmd[jid-1]);
+    return;
+  }
+  
+  printf("%s: No such %s\n", argv[1], *argv[1] == '%' ? "job" : "process");
+}
+
 void print_finished_job(pid_t pid) {
   int job_i = get_jid(pid) - 1;
   printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }
 
-static void send_sig(pid_t pid, int sig);
 extern pid_t fg_job;
 
 void terminate_fg() {
@@ -112,4 +127,25 @@ static void send_sig(pid_t pid, int sig) {
   if (kill(pgid, sig) < 0) {
     Kill(pid, sig);
   }
+}
+
+static pid_t parse_pid(char *arg) {
+  int jid;
+  if (*arg == '%') {
+    jid = atoi((arg+1));
+    if (jid >= MAXJOBS)
+      return -1;
+    /* check jid is set to a valid process */ 
+    return jobs[jid -1] > 0 ? jobs[jid-1] : -1;
+  }
+
+  int pid;
+  pid = atoi(arg);
+  if (pid <= 0)
+    return -1;
+  for (int i=0; i < MAXJOBS; i++)
+    if (jobs[i] == pid)
+      return pid;
+  /* pid is not part of jobs */
+  return -1;
 }

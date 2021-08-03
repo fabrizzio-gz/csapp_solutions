@@ -13,3 +13,5 @@ ch7/
 ch8/shellex.c
 ch8/shell
 ch8/wait*
+ch8/write
+ch8/write.c
