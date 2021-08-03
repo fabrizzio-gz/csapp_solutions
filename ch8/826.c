@@ -1,18 +1,16 @@
-/* $begin shellmain */
 #include "csapp.h"
 #include "jobs.h"
 #include "sig_handlers.h"
+
 #define MAXARGS   128
 #ifndef MAXJOBS
 #define MAXJOBS   16
 #endif
 
-/* Function prototypes */
 void eval(char *cmdline);
 int parseline(char *buf, char **argv);
 int builtin_command(char **argv);
 
-/* globals */
 pid_t jobs[MAXJOBS] = {0};
 pid_t fg_job = 0;
 sigjmp_buf buf;
@@ -36,22 +34,17 @@ int main()
     }
         
     while (1) {
-	/* Read */
 	printf("> ");                   
 	Fgets(cmdline, MAXLINE, stdin); 
 	if (feof(stdin)) {
           reap_all_children();
           exit(0);
         }
-	    
-	/* Evaluate */
 	eval(cmdline);
         reap_terminated_children();
     } 
 }
-/* $end shellmain */
   
-/* $begin eval */
 /* eval - Evaluate a command line */
 void eval(char *cmdline) 
 {
@@ -74,12 +67,12 @@ void eval(char *cmdline)
             exit(0);
           }
         }
-        
+
         /* Parent stores child PID */
         save_job(pid);
-        
-	/* Parent waits for foreground job to terminate */
+
 	if (!bg) {
+            /* Parent waits for foreground job to terminate */
 	    int status;
             fg_job = pid;
 	    if (waitpid(pid, &status, 0) < 0)
@@ -91,7 +84,6 @@ void eval(char *cmdline)
           save_job_cmd(pid, argv);
           printf("[%d] %d %s", get_jid(pid), pid, cmdline);
         } 
-	    
     }
     return;
 }
@@ -119,9 +111,7 @@ int builtin_command(char **argv)
     return 1;
   return 0;                     /* Not a builtin command */
 }
-/* $end eval */
 
-/* $begin parseline */
 /* parseline - Parse the command line and build the argv array */
 int parseline(char *buf, char **argv) 
 {
@@ -153,4 +143,3 @@ int parseline(char *buf, char **argv)
 
     return bg;
 }
-/* $end parseline */
