@@ -24,6 +24,7 @@ int main()
     Signal(2, sigint_handler);   /* SIGINT */
     Signal(20, sigint_handler);  /* SIGTSTP */
     if (sigsetjmp(buf, 1) > 0 ) {
+      Sio_puts("\n");
       if (terminate == 1) {
         terminate = 0;
         terminate_fg();

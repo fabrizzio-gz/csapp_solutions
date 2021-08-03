@@ -14,5 +14,6 @@ void sigint_handler(int sig) {
     siglongjmp(buf, 1);
   }
 
+  Sio_puts("\n");
   return;
 }
