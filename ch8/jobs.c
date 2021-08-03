@@ -90,7 +90,19 @@ void terminate_fg() {
 }
 
 void stop_fg() {
-  printf("Pressed ctrl+z!\n");
+  send_sig(fg_job, 20);
+
+  int status;
+  Waitpid(fg_job, &status, WUNTRACED);
+  if (WIFSTOPPED(status)) {
+    char s[50];
+    sprintf(s, "Job [%d] %d stopped by signal", get_jid(fg_job), fg_job);
+    psignal(WSTOPSIG(status), s);
+  }
+
+  /* Set job status to stopped */
+  job_status[get_jid(fg_job) -1] = 1;
+  fg_job = 0;
 }
 
 static void send_sig(pid_t pid, int sig) {
