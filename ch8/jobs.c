@@ -63,9 +63,13 @@ void save_job_cmd(pid_t pid, char *argv[]) {
     job_cmd[job_i][i++] = argv[arg][j++];
     if (argv[arg][j] == '\0') {
       arg++;
-      j++;
+      j=0;
+      if (i < MAXCMD - 1)
+        job_cmd[job_i][i++] = ' ';
     }
   }
+
+  job_cmd[job_i][i++] = '\0';
 }
 
 void resume_fg_job(char **argv) {
