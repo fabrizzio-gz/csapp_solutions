@@ -39,6 +39,7 @@ int main()
     Fgets(cmdline, MAXLINE, stdin); 
     if (feof(stdin)) {
       reap_all_children();
+      printf("\n");
       exit(0);
     }
     eval(cmdline);
