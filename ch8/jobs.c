@@ -73,6 +73,7 @@ void resume_fg_job(char **argv) {
   if ((pid = parse_pid(argv[1])) > 0) {
     fg_job = pid;
     send_sig(pid, 18);
+    job_status[get_jid(pid)-1] = 0; /* Status: running */
     if (waitpid(pid, NULL, 0) < 0)
       unix_error("waitfg: waitpid error");
     return;
@@ -86,7 +87,7 @@ void resume_bg_job(char **argv) {
   if ((pid = parse_pid(argv[1])) > 0) {
     send_sig(pid, 18);
     int jid = get_jid(pid);
-    job_status[jid-1] = 0; /* running */
+    job_status[jid-1] = 0; /* Status: running */
     printf("[%d] %d\t%s\n", jid, pid, job_cmd[jid-1]);
     return;
   }
