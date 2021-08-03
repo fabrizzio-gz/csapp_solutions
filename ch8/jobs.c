@@ -126,9 +126,15 @@ void stop_fg() {
 }
 
 void reap_terminated_children() {
+  int status;
   pid_t terminated_pid;
-  while ((terminated_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-    print_terminated_job(terminated_pid);
+  while ((terminated_pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (WIFSIGNALED(status)) {
+      char s[50];
+      sprintf(s, "Job %d terminated by signal", terminated_pid);
+      psignal(WTERMSIG(status), s);
+    } else
+      print_terminated_job(terminated_pid);
     release_job(terminated_pid);
   }
 }

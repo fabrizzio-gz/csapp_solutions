@@ -16,5 +16,3 @@ void sigint_handler(int sig) {
 
   return;
 }
-
-
