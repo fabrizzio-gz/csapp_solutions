@@ -71,15 +71,11 @@ void print_finished_job(pid_t pid) {
   printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }
 
+static void send_sig(pid_t pid, int sig);
 extern pid_t fg_job;
 
 void terminate_fg() {
-  pid_t pgid = -fg_job;
-  /* kill process group, if not set, kill job 
-   * (due to race conditions) */
-  if (kill(pgid, 2) < 0) {
-    Kill(fg_job, 2);
-  }
+  send_sig(fg_job, 2);
 
   int status;
   Waitpid(fg_job, &status, 0);
@@ -95,4 +91,13 @@ void terminate_fg() {
 
 void stop_fg() {
   printf("Pressed ctrl+z!\n");
+}
+
+static void send_sig(pid_t pid, int sig) {
+  pid_t pgid = -pid;
+  /* kill process group, if not set, kill job 
+   * (due to race conditions) */
+  if (kill(pgid, sig) < 0) {
+    Kill(pid, sig);
+  }
 }
