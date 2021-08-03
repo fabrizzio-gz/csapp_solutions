@@ -9,6 +9,7 @@ static void send_sig(pid_t pid, int sig);
 static pid_t parse_pid(char *arg);
 
 extern pid_t jobs[];
+extern pid_t fg_job;
 
 /* local globals */
 static char job_status[MAXJOBS] = {0}; /* 0: Running, 1: Stopped */
@@ -69,6 +70,19 @@ void save_job_cmd(pid_t pid, char *argv[]) {
   }
 }
 
+void resume_fg_job(char **argv) {
+  pid_t pid;
+  if ((pid = parse_pid(argv[1])) > 0) {
+    fg_job = pid;
+    send_sig(pid, 18);
+    if (waitpid(pid, NULL, 0) < 0)
+      unix_error("waitfg: waitpid error");
+    return;
+  }
+
+  printf("%s: No such %s\n", argv[1], *argv[1] == '%' ? "job" : "process");
+}
+
 void resume_bg_job(char **argv) {
   pid_t pid;
   if ((pid = parse_pid(argv[1])) > 0) {
@@ -86,8 +100,6 @@ void print_finished_job(pid_t pid) {
   int job_i = get_jid(pid) - 1;
   printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }
-
-extern pid_t fg_job;
 
 void terminate_fg() {
   send_sig(fg_job, 2);

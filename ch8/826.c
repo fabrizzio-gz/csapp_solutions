@@ -108,6 +108,10 @@ int builtin_command(char **argv)
       resume_bg_job(argv);
       return 1;
     }
+    if(!strcmp(argv[0], "fg")) {
+      resume_fg_job(argv);
+      return 1;
+    }
     if (!strcmp(argv[0], "&"))    /* Ignore singleton & */
 	return 1;
     return 0;                     /* Not a builtin command */
