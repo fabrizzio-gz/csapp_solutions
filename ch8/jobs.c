@@ -5,6 +5,7 @@
 #endif
 #define MAXCMD   16
 
+void reap_all_children();
 static void send_sig(pid_t pid, int sig);
 static pid_t parse_pid(char *arg);
 static void print_terminated_job(pid_t pid);
@@ -26,11 +27,7 @@ void save_job(pid_t pid) {
     }
 
   fprintf(stderr, "Reached job limit: %d. Can't save job", MAXJOBS);
-  // reap children and quit
-  // reap_children();
-  // exit(0);
   return;
-
 }
 
 int get_jid(pid_t pid) {
@@ -39,7 +36,7 @@ int get_jid(pid_t pid) {
       // JID is jobs array index + 1
       return i+1;
 
-  // reap_children();
+  reap_all_children();
   char s[64];
   sprintf(s, "get_jid: Unkown PID %d", pid);
   unix_error(s);
@@ -134,6 +131,22 @@ void reap_terminated_children() {
     print_terminated_job(terminated_pid);
     release_job(terminated_pid);
   }
+}
+
+static void reap_nonterminated_children() {
+  for (int i=0; i < MAXJOBS; i++)
+    if (jobs[i] != 0) {
+      if (job_status[i] == 1)  /* status: stopped */
+        send_sig(jobs[i], 18); /* Send SIGCONT */
+      send_sig(jobs[i], 2);
+      Waitpid(jobs[i], NULL, 0);
+      jobs[i] = 0;
+    }
+}
+
+void reap_all_children() {
+  reap_terminated_children();
+  reap_nonterminated_children();
 }
 
 static void send_sig(pid_t pid, int sig) {

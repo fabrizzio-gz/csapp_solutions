@@ -97,23 +97,25 @@ void eval(char *cmdline)
 /* If first arg is a builtin command, run it and return true */
 int builtin_command(char **argv) 
 {
-    if (!strcmp(argv[0], "quit")) /* quit command */
-	exit(0);
-    if(!strcmp(argv[0], "jobs")) {
-      print_jobs();
-      return 1;
-    }
-    if(!strcmp(argv[0], "bg")) {
-      resume_bg_job(argv);
-      return 1;
-    }
-    if(!strcmp(argv[0], "fg")) {
-      resume_fg_job(argv);
-      return 1;
-    }
-    if (!strcmp(argv[0], "&"))    /* Ignore singleton & */
-	return 1;
-    return 0;                     /* Not a builtin command */
+  if (!strcmp(argv[0], "quit")) { /* quit command */
+    reap_all_children();
+    exit(0);
+  }
+  if(!strcmp(argv[0], "jobs")) {
+    print_jobs();
+    return 1;
+  }
+  if(!strcmp(argv[0], "bg")) {
+    resume_bg_job(argv);
+    return 1;
+  }
+  if(!strcmp(argv[0], "fg")) {
+    resume_fg_job(argv);
+    return 1;
+  }
+  if (!strcmp(argv[0], "&"))    /* Ignore singleton & */
+    return 1;
+  return 0;                     /* Not a builtin command */
 }
 /* $end eval */
 

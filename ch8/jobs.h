@@ -8,3 +8,4 @@ void resume_fg_job(char **argv);
 void terminate_fg();
 void stop_fg();
 void reap_terminated_children();
+void reap_all_children();
