@@ -11,7 +11,6 @@
 void eval(char *cmdline);
 int parseline(char *buf, char **argv);
 int builtin_command(char **argv);
-void reap_finished_children();
 
 /* globals */
 pid_t jobs[MAXJOBS] = {0};
@@ -151,11 +150,3 @@ int parseline(char *buf, char **argv)
     return bg;
 }
 /* $end parseline */
-
-void reap_finished_children() {
-  pid_t finished_pid;
-  while ((finished_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-    print_finished_job(finished_pid);
-    release_job(finished_pid);
-  }
-}

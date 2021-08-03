@@ -7,6 +7,7 @@
 
 static void send_sig(pid_t pid, int sig);
 static pid_t parse_pid(char *arg);
+static void print_finished_job(pid_t pid);
 
 extern pid_t jobs[];
 extern pid_t fg_job;
@@ -96,11 +97,6 @@ void resume_bg_job(char **argv) {
   printf("%s: No such %s\n", argv[1], *argv[1] == '%' ? "job" : "process");
 }
 
-void print_finished_job(pid_t pid) {
-  int job_i = get_jid(pid) - 1;
-  printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
-}
-
 void terminate_fg() {
   send_sig(fg_job, 2);
 
@@ -132,6 +128,14 @@ void stop_fg() {
   fg_job = 0;
 }
 
+void reap_finished_children() {
+  pid_t finished_pid;
+  while ((finished_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+    print_finished_job(finished_pid);
+    release_job(finished_pid);
+  }
+}
+
 static void send_sig(pid_t pid, int sig) {
   pid_t pgid = -pid;
   /* kill process group, if not set, kill job 
@@ -160,4 +164,9 @@ static pid_t parse_pid(char *arg) {
       return pid;
   /* pid is not part of jobs */
   return -1;
+}
+
+static void print_finished_job(pid_t pid) {
+  int job_i = get_jid(pid) - 1;
+  printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }
