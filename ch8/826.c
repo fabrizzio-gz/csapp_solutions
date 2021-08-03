@@ -17,6 +17,7 @@ void reap_finished_children();
 pid_t jobs[MAXJOBS] = {0};
 pid_t fg_job = 0;
 sigjmp_buf buf;
+volatile sig_atomic_t terminate = 0;
 
 int main() 
 {
@@ -24,7 +25,11 @@ int main()
     
     Signal(2, sigint_handler);
     if (sigsetjmp(buf, 1) > 0 )
-      terminate_fg();
+      if (terminate == 1) {
+        terminate = 0;
+        terminate_fg();
+      }
+       
     
     while (1) {
 	/* Read */
