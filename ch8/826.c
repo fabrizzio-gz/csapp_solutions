@@ -72,7 +72,7 @@ void eval(char *cmdline)
 
     /* Parent stores child PID */
     save_job(pid);
-    save_job_cmd(pid, argv);
+    save_job_cmd(pid, argv, bg);
 
     if (!bg) {
       /* Parent waits for foreground job to terminate */
@@ -84,7 +84,7 @@ void eval(char *cmdline)
       fg_job = 0;
     }
     else 
-      printf("[%d] %d %s", get_jid(pid), pid, cmdline);
+      printf("[%d] %d\t\t\t%s", get_jid(pid), pid, cmdline);
     
   }
   

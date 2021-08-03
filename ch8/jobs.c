@@ -50,10 +50,10 @@ void release_job(pid_t pid) {
 void print_jobs() {
   for (int i=0; i < MAXJOBS; i++)
     if (jobs[i] != 0)
-      printf("[%d] %d %s\t%s\n", i+1, jobs[i], status[(int) job_status[i]], job_cmd[i]);
+      printf("[%d] %d %s\t\t%s\n", i+1, jobs[i], status[(int) job_status[i]], job_cmd[i]);
 }
 
-void save_job_cmd(pid_t pid, char *argv[]) {
+void save_job_cmd(pid_t pid, char *argv[], int bg) {
   int job_i = get_jid(pid) - 1;
 
   int i = 0;
@@ -69,7 +69,12 @@ void save_job_cmd(pid_t pid, char *argv[]) {
     }
   }
 
-  job_cmd[job_i][i++] = '\0';
+  if ((i < MAXCMD - 2) && bg) {
+    job_cmd[job_i][i++] = ' ';
+    job_cmd[job_i][i++] = '&';
+  }
+    
+  job_cmd[job_i][i] = '\0';
 }
 
 void resume_fg_job(char **argv) {
@@ -92,7 +97,7 @@ void resume_bg_job(char **argv) {
     send_sig(pid, 18);
     int jid = get_jid(pid);
     job_status[jid-1] = 0; /* Status: running */
-    printf("[%d] %d\t%s\n", jid, pid, job_cmd[jid-1]);
+    printf("[%d] %d\t\t\t%s\n", jid, pid, job_cmd[jid-1]);
     return;
   }
   
@@ -192,5 +197,5 @@ static pid_t parse_pid(char *arg) {
 
 static void print_terminated_job(pid_t pid) {
   int job_i = get_jid(pid) - 1;
-  printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
+  printf("[%d] %d Done\t\t\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }
