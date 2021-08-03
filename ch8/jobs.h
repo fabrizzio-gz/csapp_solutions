@@ -7,4 +7,4 @@ void resume_bg_job(char **argv);
 void resume_fg_job(char **argv);
 void terminate_fg();
 void stop_fg();
-void reap_finished_children();
+void reap_terminated_children();

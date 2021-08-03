@@ -7,7 +7,7 @@
 
 static void send_sig(pid_t pid, int sig);
 static pid_t parse_pid(char *arg);
-static void print_finished_job(pid_t pid);
+static void print_terminated_job(pid_t pid);
 
 extern pid_t jobs[];
 extern pid_t fg_job;
@@ -128,11 +128,11 @@ void stop_fg() {
   fg_job = 0;
 }
 
-void reap_finished_children() {
-  pid_t finished_pid;
-  while ((finished_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-    print_finished_job(finished_pid);
-    release_job(finished_pid);
+void reap_terminated_children() {
+  pid_t terminated_pid;
+  while ((terminated_pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+    print_terminated_job(terminated_pid);
+    release_job(terminated_pid);
   }
 }
 
@@ -166,7 +166,7 @@ static pid_t parse_pid(char *arg) {
   return -1;
 }
 
-static void print_finished_job(pid_t pid) {
+static void print_terminated_job(pid_t pid) {
   int job_i = get_jid(pid) - 1;
   printf("[%d] %d Done\t%s\n", job_i + 1, pid, job_cmd[job_i]);
 }

@@ -44,7 +44,7 @@ int main()
 
 	/* Evaluate */
 	eval(cmdline);
-        reap_finished_children();
+        reap_terminated_children();
     } 
 }
 /* $end shellmain */
