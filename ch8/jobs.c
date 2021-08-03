@@ -38,6 +38,7 @@ int get_jid(pid_t pid) {
   char s[64];
   sprintf(s, "get_jid: Unkown PID %d", pid);
   unix_error(s);
+  return -1;
 }
 
 void release_job(pid_t pid) {
@@ -48,7 +49,7 @@ void release_job(pid_t pid) {
 void print_jobs() {
   for (int i=0; i < MAXJOBS; i++)
     if (jobs[i] != 0)
-      printf("[%d] %d %s\t%s\n", i+1, jobs[i], status[job_status[i]], job_cmd[i]);
+      printf("[%d] %d %s\t%s\n", i+1, jobs[i], status[(int) job_status[i]], job_cmd[i]);
 }
 
 void save_job_cmd(pid_t pid, char *argv[]) {
