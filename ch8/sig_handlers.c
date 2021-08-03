@@ -13,8 +13,8 @@ void sigint_handler(int sig) {
       stop = 1;
     siglongjmp(buf, 1);
   }
-  // should reap children first
-  _exit(0);
+
+  return;
 }
 
 
