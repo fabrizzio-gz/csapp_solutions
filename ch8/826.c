@@ -21,8 +21,8 @@ int main()
 {
   char cmdline[MAXLINE]; /* Command line */
 
-  Signal(2, sigint_handler);   /* SIGINT */
-  Signal(20, sigint_handler);  /* SIGTSTP */
+  Signal(SIGINT, sigint_handler);
+  Signal(SIGTSTP, sigint_handler); 
   if (sigsetjmp(buf, 1) > 0 ) {
     Sio_puts("\n");
     if (terminate == 1) {

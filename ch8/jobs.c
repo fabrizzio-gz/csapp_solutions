@@ -81,7 +81,7 @@ void resume_fg_job(char **argv) {
   pid_t pid;
   if ((pid = parse_pid(argv[1])) > 0) {
     fg_job = pid;
-    send_sig(pid, 18);
+    send_sig(pid, SIGCONT);
     job_status[get_jid(pid)-1] = 0; /* Status: running */
     if (waitpid(pid, NULL, 0) < 0)
       unix_error("waitfg: waitpid error");
@@ -94,7 +94,7 @@ void resume_fg_job(char **argv) {
 void resume_bg_job(char **argv) {
   pid_t pid;
   if ((pid = parse_pid(argv[1])) > 0) {
-    send_sig(pid, 18);
+    send_sig(pid, SIGCONT);
     int jid = get_jid(pid);
     job_status[jid-1] = 0; /* Status: running */
     printf("[%d] %d\t\t\t%s\n", jid, pid, job_cmd[jid-1]);
@@ -105,7 +105,7 @@ void resume_bg_job(char **argv) {
 }
 
 void terminate_fg() {
-  send_sig(fg_job, 2);
+  send_sig(fg_job, SIGINT);
 
   int status;
   Waitpid(fg_job, &status, 0);
@@ -120,7 +120,7 @@ void terminate_fg() {
 }
 
 void stop_fg() {
-  send_sig(fg_job, 20);
+  send_sig(fg_job, SIGTSTP);
 
   int status;
   Waitpid(fg_job, &status, WUNTRACED);
@@ -153,8 +153,8 @@ static void reap_nonterminated_children() {
   for (int i=0; i < MAXJOBS; i++)
     if (jobs[i] != 0) {
       if (job_status[i] == 1)  /* status: stopped */
-        send_sig(jobs[i], 18); /* Send SIGCONT */
-      send_sig(jobs[i], 2);
+        send_sig(jobs[i], SIGCONT); 
+      send_sig(jobs[i], SIGTERM);
       Waitpid(jobs[i], NULL, 0);
       jobs[i] = 0;
     }

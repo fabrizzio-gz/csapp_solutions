@@ -7,9 +7,9 @@ extern volatile sig_atomic_t stop;
 
 void sigint_handler(int sig) {
   if (fg_job != 0) {
-    if (sig == 2)        /* SIGINT */
+    if (sig == SIGINT)        /* SIGINT */
       terminate = 1;
-    else if (sig == 20)  /* SIGTSTP */
+    else if (sig == SIGTSTP)  
       stop = 1;
     siglongjmp(buf, 1);
   }
