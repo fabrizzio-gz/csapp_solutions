@@ -39,7 +39,7 @@ int main() {
       terminate_fg();
     else if (stop == 1) 
       stop_fg();
-    terminate = stop = 0;
+    terminate = stop = fg_job = 0;
     Sigprocmask(SIG_SETMASK, &oldset, NULL);
   }
         

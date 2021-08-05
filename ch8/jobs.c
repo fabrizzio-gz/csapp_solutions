@@ -116,7 +116,6 @@ void terminate_fg() {
   }
     
   release_job(fg_job);
-  fg_job = 0;
 }
 
 void stop_fg() {
@@ -132,7 +131,6 @@ void stop_fg() {
 
   /* Set job status to stopped */
   job_status[get_jid(fg_job) -1] = 1;
-  fg_job = 0;
 }
 
 void reap_terminated_children() {
