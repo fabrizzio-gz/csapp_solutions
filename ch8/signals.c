@@ -4,6 +4,7 @@ extern pid_t fg_job;
 extern sigjmp_buf buf;
 extern volatile sig_atomic_t terminate;
 extern volatile sig_atomic_t stop;
+extern volatile sig_atomic_t pgid_set;
 
 void sigint_handler(int sig) {
   if (fg_job != 0) {
@@ -18,6 +19,7 @@ void sigint_handler(int sig) {
 }
 
 void sigusr1_handler(int sig) {
+  pgid_set = 1;
   return;
 }
 

@@ -16,6 +16,7 @@ pid_t fg_job = 0;
 sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
 volatile sig_atomic_t stop = 0;
+volatile sig_atomic_t pgid_set = 0;
 static sigset_t blocked;
 
 int main() {
@@ -79,6 +80,7 @@ void eval(char *cmdline)
     sigset_t oldset;
     /* block signals while processing job execution */
     Sigprocmask(SIG_BLOCK, &blocked, &oldset);
+    pgid_set = 0;
     if ((pid = Fork()) == 0) {   /* Child runs user job */
       /* Set pgid to children pid */
       Setpgid(0, 0);
@@ -99,10 +101,11 @@ void eval(char *cmdline)
     sigset_t all_but_sigusr1;
     Sigfillset(&all_but_sigusr1);
     Sigdelset(&all_but_sigusr1, SIGUSR1);
-    sigsuspend(&all_but_sigusr1);
+     while (!pgid_set)
+       sigsuspend(&all_but_sigusr1);
 
     /* Unblock and continue normal execution */
-   Sigprocmask(SIG_SETMASK, &oldset, NULL);
+    Sigprocmask(SIG_SETMASK, &oldset, NULL);
 
     if (!bg) {
       /* Parent waits for foreground job to terminate */
