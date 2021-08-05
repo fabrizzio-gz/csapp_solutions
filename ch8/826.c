@@ -1,6 +1,6 @@
 #include "csapp.h"
 #include "jobs.h"
-#include "sig_handlers.h"
+#include "signals.h"
 
 #define MAXARGS   128
 #ifndef MAXJOBS
@@ -17,12 +17,13 @@ sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
 volatile sig_atomic_t stop = 0;
 
-int main() 
-{
+int main() {
   char cmdline[MAXLINE]; /* Command line */
 
-  Signal(SIGINT, sigint_handler);
-  Signal(SIGTSTP, sigint_handler); 
+  /* Each signal handler blocks the other signal while handling */
+  /* E.g.: SIGINT handler blocks SIGTSTP */
+  add_signal_handler(SIGINT, sigint_handler, SIGTSTP); 
+  add_signal_handler(SIGTSTP, sigint_handler, SIGINT); 
   if (sigsetjmp(buf, 1) > 0 ) {
     Sio_puts("\n");
     if (terminate == 1) {
