@@ -16,10 +16,11 @@ pid_t fg_job = 0;
 sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
 volatile sig_atomic_t stop = 0;
-sigset_t blocked;
+static sigset_t blocked;
 
 int main() {
   char cmdline[MAXLINE]; /* Command line */
+  sigset_t oldset; /* save previous blocked signals */
 
   /* Each signal handler blocks the other signal while handling */
   /* E.g.: SIGINT handler blocks SIGTSTP */
@@ -32,7 +33,6 @@ int main() {
   Sigaddset(&blocked, SIGTSTP);
   
   if (sigsetjmp(buf, 1) > 0 ) {
-    sigset_t oldset;
     /* block signals while processing */
     Sigprocmask(SIG_BLOCK, &blocked, &oldset);
     Sio_puts("\n");
@@ -48,12 +48,17 @@ int main() {
     printf("> ");                   
     Fgets(cmdline, MAXLINE, stdin); 
     if (feof(stdin)) {
+      /* block signals before reaping children */
+      Sigprocmask(SIG_BLOCK, &blocked, NULL);
       reap_all_children();
       printf("\n");
       exit(0);
     }
     eval(cmdline);
+    /* block signals while udpating job data */
+    Sigprocmask(SIG_BLOCK, &blocked, &oldset);
     reap_terminated_children();
+    Sigprocmask(SIG_SETMASK, &oldset, NULL);
   } 
 }
   
@@ -119,6 +124,8 @@ void eval(char *cmdline)
 int builtin_command(char **argv) 
 {
   if (!strcmp(argv[0], "quit")) { /* quit command */
+    /* Block signals while reaping children */
+    Sigprocmask(SIG_BLOCK, &blocked, NULL);
     reap_all_children();
     exit(0);
   }
