@@ -6,7 +6,7 @@ extern volatile sig_atomic_t terminate;
 extern volatile sig_atomic_t stop;
 extern volatile sig_atomic_t pgid_set;
 
-void sigint_handler(int sig) {
+void sigint_sigtstp_handler(int sig) {
   if (fg_job != 0) {
     if (sig == SIGINT)   
       terminate = 1;

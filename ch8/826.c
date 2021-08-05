@@ -25,8 +25,8 @@ int main() {
 
   /* Each signal handler blocks the other signal while handling */
   /* E.g.: SIGINT handler blocks SIGTSTP */
-  add_signal_handler(SIGINT, sigint_handler, SIGTSTP); 
-  add_signal_handler(SIGTSTP, sigint_handler, SIGINT);
+  add_signal_handler(SIGINT, sigint_sigtstp_handler, SIGTSTP); 
+  add_signal_handler(SIGTSTP, sigint_sigtstp_handler, SIGINT);
   Signal(SIGUSR1, sigusr1_handler);
   
   Sigemptyset(&blocked);
