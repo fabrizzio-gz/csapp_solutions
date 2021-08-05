@@ -25,8 +25,11 @@ void save_job(pid_t pid) {
       return;
     }
 
-  fprintf(stderr, "Reached job limit: %d. Can't save job", MAXJOBS);
-  return;
+  fprintf(stderr, "Reached job limit: %d. Can't save job\n", MAXJOBS);
+  kill(pid, SIGINT);
+  Waitpid(pid, NULL, 0);
+  reap_all_children();
+  exit(1);
 }
 
 int get_jid(pid_t pid) {
