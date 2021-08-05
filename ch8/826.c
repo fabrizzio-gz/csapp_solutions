@@ -109,8 +109,11 @@ void eval(char *cmdline)
       int status;
       if (waitpid(pid, &status, 0) < 0)
         unix_error("waitfg: waitpid error");
+      /* Block signals while updating job data */
+      Sigprocmask(SIG_BLOCK, &blocked, &oldset);
       release_job(pid);
       fg_job = 0;
+      Sigprocmask(SIG_SETMASK, &oldset, NULL);
     }
     else 
       printf("[%d] %d\t\t\t%s", get_jid(pid), pid, cmdline);
