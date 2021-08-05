@@ -6,8 +6,6 @@ extern volatile sig_atomic_t terminate;
 extern volatile sig_atomic_t stop;
 
 void sigint_handler(int sig) {
-  sigset_t blocked;
-  
   if (fg_job != 0) {
     if (sig == SIGINT)   
       terminate = 1;
@@ -16,6 +14,10 @@ void sigint_handler(int sig) {
     siglongjmp(buf, 1);
   }
   Sio_puts("\n");
+  return;
+}
+
+void sigusr1_handler(int sig) {
   return;
 }
 

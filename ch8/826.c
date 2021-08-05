@@ -16,6 +16,7 @@ pid_t fg_job = 0;
 sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
 volatile sig_atomic_t stop = 0;
+sigset_t blocked;
 
 int main() {
   char cmdline[MAXLINE]; /* Command line */
@@ -24,8 +25,8 @@ int main() {
   /* E.g.: SIGINT handler blocks SIGTSTP */
   add_signal_handler(SIGINT, sigint_handler, SIGTSTP); 
   add_signal_handler(SIGTSTP, sigint_handler, SIGINT);
-
-  sigset_t blocked;
+  Signal(SIGUSR1, sigusr1_handler);
+  
   Sigemptyset(&blocked);
   Sigaddset(&blocked, SIGINT);
   Sigaddset(&blocked, SIGTSTP);
@@ -69,24 +70,38 @@ void eval(char *cmdline)
   if (argv[0] == NULL)  
     return;   /* Ignore empty lines */
 
-  if (!builtin_command(argv)) { 
+  if (!builtin_command(argv)) {
+    sigset_t oldset;
+    /* block signals while processing job execution */
+    Sigprocmask(SIG_BLOCK, &blocked, &oldset);
     if ((pid = Fork()) == 0) {   /* Child runs user job */
       /* Set pgid to children pid */
       Setpgid(0, 0);
+      /* Send parent SIGUSR1 when done setting pgid */
+      kill(getppid(), SIGUSR1);
+      Sigprocmask(SIG_SETMASK, &oldset, NULL);
       if (execve(argv[0], argv, environ) < 0) {
         printf("%s: Command not found.\n", argv[0]);
         exit(0);
       }
     }
-
-    /* Parent stores child PID */
+    /* Parent stores child job data */
     save_job(pid);
+    if (!bg) fg_job = pid;
     save_job_cmd(pid, argv, bg);
+
+    /* Suspend execution until child pgid is set */
+    sigset_t all_but_sigusr1;
+    Sigfillset(&all_but_sigusr1);
+    Sigdelset(&all_but_sigusr1, SIGUSR1);
+    sigsuspend(&all_but_sigusr1);
+
+    /* Unblock and continue normal execution */
+   Sigprocmask(SIG_SETMASK, &oldset, NULL);
 
     if (!bg) {
       /* Parent waits for foreground job to terminate */
       int status;
-      fg_job = pid;
       if (waitpid(pid, &status, 0) < 0)
         unix_error("waitfg: waitpid error");
       release_job(pid);
