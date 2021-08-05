@@ -81,7 +81,11 @@ void eval(char *cmdline)
     /* block signals while processing job execution */
     Sigprocmask(SIG_BLOCK, &blocked, &oldset);
     pgid_set = 0;
-    if ((pid = Fork()) == 0) {   /* Child runs user job */
+    if ((pid = Fork()) == 0) {
+      /* Child process */
+      /* reestablish default handlers */
+      Signal(SIGINT, SIG_DFL);
+      Signal(SIGTSTP, SIG_DFL);
       /* Set pgid to children pid */
       Setpgid(0, 0);
       /* Send parent SIGUSR1 when done setting pgid */
@@ -101,8 +105,8 @@ void eval(char *cmdline)
     sigset_t all_but_sigusr1;
     Sigfillset(&all_but_sigusr1);
     Sigdelset(&all_but_sigusr1, SIGUSR1);
-     while (!pgid_set)
-       sigsuspend(&all_but_sigusr1);
+    while (!pgid_set)
+      sigsuspend(&all_but_sigusr1);
 
     /* Unblock and continue normal execution */
     Sigprocmask(SIG_SETMASK, &oldset, NULL);
