@@ -110,7 +110,7 @@ void terminate_fg() {
   Waitpid(fg_job, &status, 0);
   if (WIFSIGNALED(status)) {
     char s[50];
-    sprintf(s, "Job %d terminated by signal", fg_job);
+    sprintf(s, "Job [%d] %d terminated by signal", get_jid(fg_job), fg_job);
     psignal(WTERMSIG(status), s);
   }
     
