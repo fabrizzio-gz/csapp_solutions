@@ -23,16 +23,24 @@ int main() {
   /* Each signal handler blocks the other signal while handling */
   /* E.g.: SIGINT handler blocks SIGTSTP */
   add_signal_handler(SIGINT, sigint_handler, SIGTSTP); 
-  add_signal_handler(SIGTSTP, sigint_handler, SIGINT); 
+  add_signal_handler(SIGTSTP, sigint_handler, SIGINT);
+
+  sigset_t blocked;
+  Sigemptyset(&blocked);
+  Sigaddset(&blocked, SIGINT);
+  Sigaddset(&blocked, SIGTSTP);
+  
   if (sigsetjmp(buf, 1) > 0 ) {
+    sigset_t oldset;
+    /* block signals while processing */
+    Sigprocmask(SIG_BLOCK, &blocked, &oldset);
     Sio_puts("\n");
-    if (terminate == 1) {
-      terminate = 0;
+    if (terminate == 1) 
       terminate_fg();
-    } else if (stop == 1) {
-      stop = 0;
+    else if (stop == 1) 
       stop_fg();
-    }
+    terminate = stop = 0;
+    Sigprocmask(SIG_SETMASK, &oldset, NULL);
   }
         
   while (1) {
