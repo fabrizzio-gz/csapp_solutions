@@ -16,7 +16,6 @@ pid_t fg_job = 0;
 sigjmp_buf buf;
 volatile sig_atomic_t terminate = 0;
 volatile sig_atomic_t stop = 0;
-volatile sig_atomic_t pgid_set = 0;
 static sigset_t blocked;
 
 int main() {
@@ -77,10 +76,10 @@ void eval(char *cmdline)
     return;   /* Ignore empty lines */
 
   if (!builtin_command(argv)) {
-    sigset_t oldset;
-    /* block signals while processing job execution */
-    Sigprocmask(SIG_BLOCK, &blocked, &oldset);
-    pgid_set = 0;
+    sigset_t oldset, block_int_stp_usr1 = blocked;
+    /* block SIGTSTP, SIGINT, and SIGUSR1 while processing job execution */
+    Sigaddset(&block_int_stp_usr1, SIGUSR1);
+    Sigprocmask(SIG_BLOCK, &block_int_stp_usr1, &oldset);
     if ((pid = Fork()) == 0) {
       /* Child process */
       /* reestablish default handlers */
@@ -105,8 +104,7 @@ void eval(char *cmdline)
     sigset_t all_but_sigusr1;
     Sigfillset(&all_but_sigusr1);
     Sigdelset(&all_but_sigusr1, SIGUSR1);
-    while (!pgid_set)
-      sigsuspend(&all_but_sigusr1);
+    sigsuspend(&all_but_sigusr1);
 
     /* Unblock and continue normal execution */
     Sigprocmask(SIG_SETMASK, &oldset, NULL);
