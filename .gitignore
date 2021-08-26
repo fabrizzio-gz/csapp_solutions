@@ -16,3 +16,7 @@ ch8/wait*
 ch8/write
 ch8/write.c
 ch9/hello.txt
+*/csapp.*
+ch9/mm.*
+ch9/memlib.*
+ch10/cpfile.c
