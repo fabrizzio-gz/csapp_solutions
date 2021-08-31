@@ -22,3 +22,4 @@ ch9/memlib.*
 ch10/cpfile.c
 ch10/foo.txt
 ch11/hex2dd.c
+ch11/hostinfo
