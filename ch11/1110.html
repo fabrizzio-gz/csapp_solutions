@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <form id="form">
+      <input type="number" id="n1" />
+      <input type="number" id="n2" />
+      <input type="submit" value="add" />
+    </form>
+  </body>
+  <script>
+    const form = document.getElementById("form");
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const n1 = document.getElementById("n1").value;
+      const n2 = document.getElementById("n2").value;
+      window.location.replace(`/cgi-bin/adder?${n1}&${n2}`);
+    };
+  </script>
+</html>
