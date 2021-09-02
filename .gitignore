@@ -23,3 +23,6 @@ ch10/cpfile.c
 ch10/foo.txt
 ch11/hex2dd.c
 ch11/hostinfo
+ch11/server
+ch11/tiny.c
+
