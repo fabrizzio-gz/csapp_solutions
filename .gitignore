@@ -31,3 +31,4 @@ ch11/home.html
 !ch11/cgi-bin
 ch11/cgi-bin/*
 !ch11/cgi-bin/adderpost.c
+ch12/server
