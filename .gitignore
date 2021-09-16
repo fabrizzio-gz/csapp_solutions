@@ -14,6 +14,9 @@ ch08/shell
 ch08/wait*
 ch08/write
 ch08/write.c
+ch08/counterprob.c
+ch08/csapp.c
+ch08/csapp.h
 ch09/hello.txt
 */csapp.*
 ch09/mm.*
