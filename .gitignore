@@ -34,5 +34,8 @@ ch11/home.html
 ch11/cgi-bin/*
 !ch11/cgi-bin/adderpost.c
 ch12/server
+ch12/seq
+ch12/thread
 csapp_answer_ed.2.pdf
+
 
